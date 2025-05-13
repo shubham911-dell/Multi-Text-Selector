@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "MultiSelect",
+  "description": "Make, copy of concurrent text selections.",
+  "version": "2.0.0",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "clipboardWrite",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

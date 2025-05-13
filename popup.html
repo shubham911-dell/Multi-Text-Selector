@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MultiSelect Copy Options</title>
+  <style>
+    body { font-family: sans-serif; padding: 10px; width: 240px; }
+    h3 { margin-top: 0; }
+    label { display: block; margin: 8px 0 4px; }
+    .toggle { margin: 4px 0; }
+    #status { margin-top: 8px; font-size: 0.9em; color: green; min-height: 1em; }
+  </style>
+</head>
+<body>
+  <h3>Copy Options</h3>
+  <label>Copy Mode:</label>
+  <label><input type="radio" name="copy-mode" value="newline" checked> Newline</label>
+  <label><input type="radio" name="copy-mode" value="space"> Spaces</label>
+  <label><input type="radio" name="copy-mode" value="bullets"> Bullets</label>
+  <div class="toggle">
+    <label><input type="checkbox" id="multiSearchToggle" checked> Enable MultiSearch</label>
+    <label><input type="checkbox" id="combinedSearchToggle" checked> Enable CombinedSearch</label>
+  </div>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
