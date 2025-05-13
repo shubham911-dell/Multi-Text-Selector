@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "MultiSelect",
-  "description": "Make, copy of concurrent text selections.",
-  "version": "2.0.0",
+  "description": "Make, copy, and search multiple concurrent text selections.",
+  "version": "2.1.0",
   "permissions": [
     "contextMenus",
     "storage",

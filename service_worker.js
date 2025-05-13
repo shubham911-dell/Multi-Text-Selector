@@ -6,7 +6,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.storage.sync.get([
       'modifierKey',
       'highlightColor',
-      'domainsEnabled'
+      'copyMode',
+      'multiSearch',
+      'combinedSearch'
     ], prefs => sendResponse(prefs));
     return true; // async
   }
@@ -22,60 +24,76 @@ const SEARCH_ENGINES = {
 
 const CONTEXT_MENU_IDS = ['multi-search', 'combined-search'];
 
-function createMenus(options = {}) {
+function createMenus({ multiSearch = true, combinedSearch = true } = {}) {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'multi-search',
       title: 'MultiSearch (all selections)',
       contexts: ['all'],
-      visible: options.multiSearch !== false
+      visible: multiSearch
     });
     chrome.contextMenus.create({
       id: 'combined-search',
       title: 'CombinedSearch (all selections)',
       contexts: ['all'],
-      visible: options.combinedSearch !== false
+      visible: combinedSearch
     });
-    chrome.contextMenus.create({
-      id: 'search-google',
-      title: 'Search Google for "%s"',
-      contexts: ['selection']
-    });
-    chrome.contextMenus.create({
-      id: 'search-youtube',
-      title: 'Search YouTube for "%s"',
-      contexts: ['selection']
-    });
-    chrome.contextMenus.create({
-      id: 'search-wikipedia',
-      title: 'Search Wikipedia for "%s"',
-      contexts: ['selection']
+    ['google', 'youtube', 'wikipedia'].forEach(engine => {
+      chrome.contextMenus.create({
+        id: `search-${engine}`,
+        title: `Search ${engine[0].toUpperCase() + engine.slice(1)} for "%s"`,
+        contexts: ['selection']
+      });
     });
   });
 }
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.sync.get(['multiSearch', 'combinedSearch'], createMenus);
+chrome.runtime.onInstalled.addListener(details => {
+  // Set defaults only on fresh install or update
+  chrome.storage.sync.get(null, current => {
+    const defaults = {
+      modifierKey: 'Control',
+      highlightColor: 'rgb(219,252,144)',
+      copyMode: 'space',
+      multiSearch: true,
+      combinedSearch: true
+    };
+    // Only write defaults if they aren't already set
+    const toSet = {};
+    for (let k in defaults) {
+      if (current[k] === undefined) toSet[k] = defaults[k];
+    }
+    if (Object.keys(toSet).length) {
+      chrome.storage.sync.set(toSet);
+    }
+    // Build context menus with the stored (or default) toggles
+    chrome.storage.sync.get(['multiSearch', 'combinedSearch'], createMenus);
+  });
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && (changes.multiSearch || changes.combinedSearch)) {
-    chrome.storage.sync.get(['multiSearch', 'combinedSearch'], createMenus);
+  if (area === 'sync' &&
+      ('multiSearch' in changes || 'combinedSearch' in changes)) {
+    const newVals = {};
+    if (changes.multiSearch)   newVals.multiSearch   = changes.multiSearch.newValue;
+    if (changes.combinedSearch) newVals.combinedSearch = changes.combinedSearch.newValue;
+    createMenus(newVals);
   }
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId.startsWith('search-')) {
-    const engine = info.menuItemId.replace('search-', '');
-    const url = SEARCH_ENGINES[engine.charAt(0).toUpperCase() + engine.slice(1)](info.selectionText);
+  const { menuItemId, selectionText } = info;
+  if (menuItemId.startsWith('search-')) {
+    const engine = menuItemId.replace('search-', '');
+    const url = SEARCH_ENGINES[engine.charAt(0).toUpperCase() + engine.slice(1)](selectionText);
     chrome.tabs.create({ url });
-  }
-  if (info.menuItemId === 'multi-search' || info.menuItemId === 'combined-search') {
+  } else if (menuItemId === 'multi-search' || menuItemId === 'combined-search') {
     chrome.tabs.sendMessage(tab.id, { type: 'getSelections' }, res => {
       if (!res || !res.selections) return;
-      if (info.menuItemId === 'multi-search') {
+      if (menuItemId === 'multi-search') {
         res.selections.forEach(text => {
-          if (text && text.trim()) chrome.tabs.create({ url: SEARCH_ENGINES.Google(text) });
+          if (text.trim())
+            chrome.tabs.create({ url: SEARCH_ENGINES.Google(text) });
         });
       } else {
         const combined = res.selections.filter(Boolean).join(' ');
@@ -85,7 +103,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-chrome.action.onClicked.addListener(tab => {
+chrome.action.onClicked.addListener(() => {
   chrome.runtime.openOptionsPage();
 });
 

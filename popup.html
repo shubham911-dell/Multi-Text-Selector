@@ -2,24 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>MultiSelect Copy Options</title>
+  <title>MultiSelect Options</title>
   <style>
-    body { font-family: sans-serif; padding: 10px; width: 240px; }
+    body { font-family: sans-serif; padding: 10px; width: 260px; }
     h3 { margin-top: 0; }
-    label { display: block; margin: 8px 0 4px; }
+    label { display: block; margin: 8px 0 4px; cursor: pointer; }
     .toggle { margin: 4px 0; }
     #status { margin-top: 8px; font-size: 0.9em; color: green; min-height: 1em; }
+    .radio-group label.selected,
+    .toggle label.selected {
+      background: #e0f7fa;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #00796b;
+      box-shadow: 0 0 0 2px #4dd0e1;
+      transition: background 0.2s, color 0.2s;
+    }
+    .radio-group label,
+    .toggle label {
+      padding: 3px 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .radio-group input[type="radio"]:focus + span,
+    .toggle input[type="checkbox"]:focus + span {
+      outline: 2px solid #4dd0e1;
+    }
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      margin: 10px 0 0 0;
+    }
+    .color-picker-row label {
+      margin: 0 8px 0 0;
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      font-weight: normal;
+      color: inherit;
+    }
+    #highlightPreview {
+      width: 32px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid #bbb;
+      margin-left: 8px;
+      display: inline-block;
+      vertical-align: middle;
+      background: #dbfc90;
+      transition: background 0.2s;
+    }
   </style>
 </head>
 <body>
   <h3>Copy Options</h3>
-  <label>Copy Mode:</label>
-  <label><input type="radio" name="copy-mode" value="newline" checked> Newline</label>
-  <label><input type="radio" name="copy-mode" value="space"> Spaces</label>
-  <label><input type="radio" name="copy-mode" value="bullets"> Bullets</label>
+  <div class="radio-group">
+    <label><input type="radio" name="copy-mode" value="newline"><span> Newline</span></label>
+    <label><input type="radio" name="copy-mode" value="space"><span> Spaces</span></label>
+    <label><input type="radio" name="copy-mode" value="bullets"><span> Bullets</span></label>
+  </div>
   <div class="toggle">
-    <label><input type="checkbox" id="multiSearchToggle" checked> Enable MultiSearch</label>
-    <label><input type="checkbox" id="combinedSearchToggle" checked> Enable CombinedSearch</label>
+    <label><input type="checkbox" id="multiSearchToggle"><span> Enable MultiSearch</span></label>
+    <label><input type="checkbox" id="combinedSearchToggle"><span> Enable CombinedSearch</span></label>
+  </div>
+  <div class="color-picker-row">
+    <label for="highlightColor">Highlight Color:</label>
+    <input type="color" id="highlightColor" value="#dbfc90">
+    <span id="highlightPreview"></span>
   </div>
   <div id="status"></div>
   <script src="popup.js"></script>
