@@ -80,6 +80,6 @@ MultiSelect is a Chrome extension that lets you select, copy, and search multipl
 
 ## Credits
 
-**Created and maintained by ~-Shubham Dhakal-~ ***
+**Created and maintained by [[Shubham Dhakal]]
 
 ~~**##If you use or modify this extension, please retain this credit in your documentation or about page.##**~~~
